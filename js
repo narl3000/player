@@ -35,28 +35,28 @@ const music_list = [
     name: 'S07E36 - Radio Libre',
     artist: 'Floodcast',
     music: 'song.mp3',
-    background: 'linear-gradient(to right, #BAD9EB,#A9C9D6)', 
+    background: 'linear-gradient(to right, #BAD9EB,#8E9DA3)',
   },
   {
     img: 'image2.jpg',
     name: 'S4E15 - avec Mistermv & Ultia',
     artist: 'Popcorn',
     music: 'song2.mp3',
-    background: 'linear-gradient(to right, #AA2228, #151515)', 
+    background: 'linear-gradient(to right, #AA2228, #151515)',
   },
   {
     img: 'image3.jpg',
     name: '#119 Avec Disiz',
     artist: 'A bientôt de te revoir',
     music: 'song3.mp3',
-    background: 'linear-gradient(to right, #F9C347, #FEE1E5)', 
+    background: 'linear-gradient(to right, #FDE0E4, #FDC41F)',
   },
   {
     img: 'image4.jpg',
     name: 'Avec Karim Benzema (S06E10)',
     artist: 'Zack en roue libre',
     music: 'song4.mp3',
-    background: 'linear-gradient(to right, #960103, #FFD193)', 
+    background: 'linear-gradient(to right, #960103, #FFD193)',
   },
 ];
 
@@ -66,6 +66,7 @@ const music_list = [
 // Fonction pour mettre en pause ou jouer la chanson courante et mettre à jour l'icône affichée
 function playpauseTrack() {
   // Toggle the play/pause state and update the displayed icon
+  seek_slider.max = curr_track.duration;
   if (curr_track.paused) {
     curr_track.play();
     document.querySelector('.playpause-track i').classList.remove('fa-play-circle');
@@ -80,7 +81,7 @@ function playpauseTrack() {
 
 
 // Fonction pour passer à la chanson suivante dans la liste de musique
-function nextTrack() {
+async function nextTrack() {
   // Increment the track index
   track_index = (track_index + 1) % music_list.length;
 
@@ -89,33 +90,38 @@ function nextTrack() {
 
   // Play the new track
   playpause_btn.innerHTML = '<i class="fa fa-pause-circle fa-5x"></i>';
-  curr_track.play();
+  await curr_track.play();
+  seek_slider.max = curr_track.duration;
+
   isPlaying = true;
 }
 
 // Fonction pour passer à la chanson précédente dans la liste de musique
-function prevTrack() {
+async function prevTrack() {
   // Décrémenter l'index de la chanson courante
   track_index = (track_index - 1 + music_list.length) % music_list.length;
 
   // Charger et jouer la chanson précédente
   loadTrack(track_index);
+
+
   playpause_btn.innerHTML = '<i class="fa fa-pause-circle fa-5x"></i>';
-  curr_track.play();
+  await curr_track.play();
+  seek_slider.max = curr_track.duration;
   isPlaying = true;
 }
 
 
 
-function randomTrack() {
+async function randomTrack() {
   // Générer un nombre aléatoire compris entre 0 et la longueur du tableau music_list
   let randomIndex = Math.floor(Math.random() * music_list.length);
 
   // Charger et jouer la chanson sélectionnée aléatoirement
   loadTrack(randomIndex);
   playpause_btn.innerHTML = '<i class="fa fa-pause-circle fa-5x"></i>';
-  curr_track.play();
-  isPlaying = true;
+  await curr_track.play();
+  seek_slider.max = curr_track.duration;
 }
 
 
@@ -123,6 +129,8 @@ function randomTrack() {
 function updateSeek() {
   // Calculate the seek slider value
   seek_slider.value = (curr_track.currentTime);
+
+
   // Calculate the current time in minutes and seconds
   let currentMinutes = Math.floor(curr_track.currentTime / 60);
   let currentSeconds = Math.floor(curr_track.currentTime % 60);
@@ -137,7 +145,7 @@ function updateSeek() {
 
 function seekTrack() {
   // Calculate the new time based on the seek slider value
-  curr_track.currentTime = seek_slider.value ;
+  curr_track.currentTime = seek_slider.value;
 }
 
 
@@ -216,7 +224,7 @@ forward_btn.onclick = forwardTrack; // Attach the forwardTrack function to the o
 
 function loadTrack(track_index) {
   // Réinitialise le curseur de progression et l'affichage du temps actuel
-  seek_slider.value = 0;
+  // seek_slider.value = curr_track.currentTime;
   seek_slider.max = curr_track.duration;
   curr_time.textContent = '00:00';
 
@@ -236,8 +244,8 @@ function loadTrack(track_index) {
   // Met à jour la source audio
   curr_track.src = music_list[track_index].music; // Modifie la source audio en utilisant les informations sur la piste de la liste de musique spécifiée par l'index de piste
   curr_track.load();
-   // Change la couleur du wrapper
-   document.querySelector('.wrapper').style.background = music_list[track_index].background;
+  // Change la couleur du wrapper
+  document.querySelector('.wrapper').style.background = music_list[track_index].background;
 }
 
 
@@ -281,7 +289,7 @@ curr_track.addEventListener('volumechange', updateVolumeSlider);
 
 // Add event listeners
 
-seek_slider.addEventListener('input', function() {
+seek_slider.addEventListener('input', function () {
   // Set the current track's current time to the value of the seek slider
   curr_track.currentTime = this.value;
 });
